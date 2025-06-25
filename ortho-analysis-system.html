@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reda Consultoria - Sistema de Análise Ortodôntica</title>
+    <style>
+        :root {
+            --background: oklch(0.12 0.03 250);
+            --foreground: oklch(0.95 0.01 240);
+            --card: oklch(0.15 0.02 250);
+            --card-foreground: oklch(0.95 0.01 240);
+            --primary: oklch(0.80 0.10 85);
+            --primary-foreground: oklch(0.15 0.02 250);
+            --secondary: oklch(0.20 0.02 250);
+            --secondary-foreground: oklch(0.95 0.01 240);
+            --muted: oklch(0.18 0.02 250);
+            --muted-foreground: oklch(0.65 0.02 250);
+            --accent: oklch(0.25 0.03 250);
+            --accent-foreground: oklch(0.95 0.01 240);
+            --destructive: oklch(0.70 0.22 25);
+            --destructive-foreground: oklch(0.95 0.01 240);
+            --border: oklch(0.25 0.02 250);
+            --input: oklch(0.18 0.02 250);
+            --input-foreground: oklch(0.95 0.01 240);
+            --input-placeholder: oklch(0.55 0.02 250);
+            --ring: oklch(0.80 0.10 85);
+            --sidebar: oklch(0.15 0.02 250);
+            --sidebar-foreground: oklch(0.95 0.01 240);
+            --sidebar-border: oklch(0.25 0.02 250);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header Styles - Reduzido */
+        .header {
+            background: linear-gradient(135deg, oklch(0.22 0.02 250), oklch(0.18 0.015 255), oklch(0.15 0.01 260));
+            padding: 8px 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            border-bottom: 1px solid var(--primary);
+            flex-shrink: 0;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .app-branding {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .app-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), oklch(0.95 0.01 240));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .app-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.7;
+            color: oklch(0.75 0.02 245);
+        }
+
+        .case-info {
+            background: var(--muted);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+        }
+
+        .case-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-foreground);
+            opacity: 0.8;
+        }
+
+        .form-input, .form-select {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--input);
+            color: var(--input-foreground);
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+        }
+
+        .image-counter {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--primary);
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            height: calc(100vh - 120px);
+        }
+
+        /* Sidebar Styles - Fixed */
+        .sidebar {
+            background: var(--sidebar);
+            border-right: 1px solid var(--sidebar-border);
+            padding: 12px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            width: 280px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--muted);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        .section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--foreground);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .section-title svg {
+            width: 18px;
+            height: 18px;
+            opacity: 0.8;
+        }
+
+        /* Image Gallery */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 4px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .gallery-grid::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .gallery-grid::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .gallery-item:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .gallery-item.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .progress-bar {
+            background: var(--muted);
+            border-radius: 4px;
+            height: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, rgba(255, 193, 7, 0.7), var(--primary));
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--card);
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .upload-area.dragging {
+            border-color: var(--primary);
+            background: rgba(255, 193, 7, 0.1);
+        }
+
+        .upload-area svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+
+        .upload-area p {
+            font-size: 0.75rem;
+            margin: 2px 0;
+        }
+
+        /* Toolbox */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        .tool-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            height: 56px;
+            font-size: 0.7rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--card);
+            color: var(--card-foreground);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .tool-button:hover {
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .tool-button.active {
+            background: var(--primary);
+            color: var(--primary-foreground);
+            border-color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tool-button svg {
+            width: 18px;
+            height: 18px;
+            margin-bottom: 2px;
+        }
+
+        .pan-tool {
+            width: 100%;
+            height: 40px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* Color Palette */
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .color-button {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .color-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .color-button.selected {
+            transform: scale(1.15);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        /* Sliders */
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .slider-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--muted-foreground);
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--muted);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            flex: 1;
+            background: var(--background);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .canvas-placeholder {
+            text-align: center;
+            color: var(--muted-foreground);
+            user-select: none;
+        }
+
+        .canvas-placeholder svg {
+            width: 48px;
+            height: 48px;
+            color: rgba(255, 193, 7, 0.5);
+            margin-bottom: 12px;
+        }
+
+        .canvas-placeholder h3 {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .canvas-placeholder p {
+            font-size: 0.875rem;
+        }
+
+        #canvas {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            cursor: crosshair;
+        }
+
+        /* Canvas Controls */
+        .canvas-controls {
+            background: var(--card);
+            padding: 4px 8px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+        }
+
+        .controls-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .control-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: transparent;
+            color: var(--foreground);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .control-button:hover:not(:disabled) {
+            background: var(--accent);
+            color: var(--accent-foreground);
+        }
+
+        .control-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .control-button svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .zoom-display {
+            color: var(--muted-foreground);
+            width: 40px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.7rem;
+        }
+
+        .status-display {
+            color: var(--muted-foreground);
+            flex: 1;
+            text-align: center;
+            font-size: 0.7rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Documentation Panel */
+        .documentation-panel {
+            background: var(--sidebar);
+            border-left: 1px solid var(--sidebar-border);
+            padding: 12px;
+            overflow-y: auto;
+            width: 320px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+        }
+
+        .documentation-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .documentation-panel::-webkit-scrollbar-track {
+            background: var(--muted);
+        }
+
+        .documentation-panel::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .image-details {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 0.7rem;
+            color: var(--muted-foreground);
+        }
+
+        .image-details p {
+            margin: 2px 0;
+        }
+
+        .image-details strong {
+            color: var(--foreground);
+        }
+
+        .form-textarea {
+            min-height: 60px;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--input);
+            color: var(--input-foreground);
+            font-size: 0.8rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.2s;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+        }
+
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            gap: 6px;
+        }
+
+        .action-button.primary {
+            background: var(--primary);
+            color: var(--primary-foreground);
+            border-color: var(--primary);
+        }
+
+        .action-button.outline {
+            background: transparent;
+            color: var(--foreground);
+        }
+
+        .action-button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-button svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Action Buttons Grid */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .action-buttons .full-width {
+            grid-column: span 2;
+        }
+
+        .tips-box {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: rgba(255, 193, 7, 0.9);
+            margin-top: auto;
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .documentation-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 240px;
+            }
+            
+            .app-title {
+                font-size: 1.25rem;
+            }
+            
+            .case-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="app-branding">
+                        <h1 class="app-title">Dr. Nasser Ghane Reda</h1>
+                        <p class="app-subtitle">Sistema de Análise Digital</p>
+                    </div>
+                    <div class="image-counter" id="imageCounter">Nenhuma imagem</div>
+                </div>
+                
+                <div class="case-info">
+                    <form class="case-form">
+                        <div class="form-group">
+                            <label class="form-label" for="patientName">👤 Paciente</label>
+                            <input type="text" id="patientName" class="form-input" placeholder="Nome do paciente">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="dentistName">🦷 Dentista</label>
+                            <input type="text" id="dentistName" class="form-input" placeholder="Nome do dentista">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="entryDate">📅 Data</label>
+                            <input type="date" id="entryDate" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="caseStatus">📋 Status</label>
+                            <select id="caseStatus" class="form-select">
+                                <option value="pending">Pendente</option>
+                                <option value="in-progress">Em Andamento</option>
+                                <option value="completed">Concluído</option>
+                                <option value="delivered">Entregue</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- Image Gallery -->
+                <div class="section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"></path></svg>
+                        Galeria de Imagens
+                    </h3>
+                    
+                    <div class="gallery-grid" id="galleryGrid">
+                        <p style="grid-column: span 3; text-align: center; color: var(--muted-foreground); padding: 12px; font-size: 0.75rem;">
+                            Nenhuma imagem carregada
+                        </p>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <small style="color: var(--muted-foreground); font-size: 0.7rem;" id="progressText">0 de 0 analisadas</small>
+
+                    <div class="upload-area" id="uploadArea">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"></path>
+                        </svg>
+                        <p style="font-weight: 600;">Carregar imagens</p>
+                        <p style="color: var(--muted-foreground);">ou arraste aqui</p>
+                        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.tiff,.tif,.dicom,.dcm" multiple style="display: none;">
+                    </div>
+                </div>
+
+                <!-- Toolbox -->
+                <div class="section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"></path></svg>
+                        Ferramentas
+                    </h3>
+                    
+                    <div class="tools-grid" id="toolsGrid">
+                        <button class="tool-button active" data-tool="pen" title="Caneta">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.06 9.02l.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.26 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z"></path></svg>
+                            <span>Caneta</span>
+                        </button>
+                        <button class="tool-button" data-tool="line" title="Linha">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="3" y1="20" x2="21" y2="4"></line></svg>
+                            <span>Linha</span>
+                        </button>
+                        <button class="tool-button" data-tool="arrow" title="Seta">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"></path></svg>
+                            <span>Seta</span>
+                        </button>
+                        <button class="tool-button" data-tool="circle" title="Círculo">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><circle cx="12" cy="12" r="9"></circle></svg>
+                            <span>Círculo</span>
+                        </button>
+                        <button class="tool-button" data-tool="rectangle" title="Retângulo">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><rect x="4" y="4" width="16" height="16" rx="1"></rect></svg>
+                            <span>Retângulo</span>
+                        </button>
+                        <button class="tool-button" data-tool="text" title="Texto">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 4v3h5.5v12h3V7H19V4z"></path></svg>
+                            <span>Texto</span>
+                        </button>
+                    </div>
+                    
+                    <button class="tool-button pan-tool" data-tool="pan" title="Mover">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9.5 5H14.5L12 2ZM5 9.5L2 12L5 14.5V9.5ZM19 9.5V14.5L22 12L19 9.5ZM12 22L14.5 19H9.5L12 22ZM12 6C10.9 6 10 6.9 10 8V10H8C6.9 10 6 10.9 6 12C6 13.1 6.9 14 8 14H10V16C10 17.1 10.9 18 12 18C13.1 18 14 17.1 14 16V14H16C17.1 14 18 13.1 18 12C18 10.9 17.1 10 16 10H14V8C14 6.9 13.1 6 12 6Z"></path></svg>
+                        <span>Mover</span>
+                    </button>
+
+                    <div class="slider-group">
+                        <label class="slider-label">Cor:</label>
+                        <div class="color-palette">
+                            <button class="color-button selected" data-color="oklch(0.80 0.10 85)" style="background-color: oklch(0.80 0.10 85);" title="Dourado"></button>
+                            <button class="color-button" data-color="oklch(0.70 0.22 25)" style="background-color: oklch(0.70 0.22 25);" title="Vermelho"></button>
+                            <button class="color-button" data-color="oklch(0.70 0.20 130)" style="background-color: oklch(0.70 0.20 130);" title="Verde"></button>
+                            <button class="color-button" data-color="oklch(0.70 0.18 260)" style="background-color: oklch(0.70 0.18 260);" title="Azul"></button>
+                            <button class="color-button" data-color="oklch(0.92 0.01 240)" style="background-color: oklch(0.92 0.01 240);" title="Branco"></button>
+                            <button class="color-button" data-color="oklch(0.75 0.15 300)" style="background-color: oklch(0.75 0.15 300);" title="Magenta"></button>
+                            <button class="color-button" data-color="oklch(0.80 0.15 200)" style="background-color: oklch(0.80 0.15 200);" title="Ciano"></button>
+                            <button class="color-button" data-color="oklch(0.4 0.01 250)" style="background-color: oklch(0.4 0.01 250);" title="Cinza"></button>
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <label class="slider-label" for="strokeWidth">Espessura: <span id="strokeWidthValue">2</span>px</label>
+                        <input type="range" id="strokeWidth" class="slider" min="1" max="20" value="2">
+                    </div>
+
+                    <div class="slider-group">
+                        <label class="slider-label" for="opacity">Opacidade: <span id="opacityValue">100</span>%</label>
+                        <input type="range" id="opacity" class="slider" min="10" max="100" value="100">
+                    </div>
+                </div>
+
+                <!-- Image Adjustments -->
+                <div class="section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/><path d="M12 22C6.48 22 2 17.52 2 12S6.48 2 12 2s10 4.48 10 10-4.48 10-10 10zm0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8 8-3.59 8-8-3.59-8-8-8z"/></svg>
+                        Ajustes
+                    </h3>
+                    <div class="slider-group">
+                        <label class="slider-label" for="brightness">Brilho: <span id="brightnessValue">0</span>%</label>
+                        <input type="range" id="brightness" class="slider" min="0" max="200" value="100">
+                    </div>
+                    <div class="slider-group">
+                        <label class="slider-label" for="contrast">Contraste: <span id="contrastValue">0</span>%</label>
+                        <input type="range" id="contrast" class="slider" min="0" max="200" value="100">
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="action-button outline" id="undoBtn" disabled title="Desfazer">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"></path></svg>
+                        Desfazer
+                    </button>
+                    <button class="action-button outline" id="redoBtn" disabled title="Refazer">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22l2.37.78C5.45 12.31 8.46 10 11.5 10c1.96 0 3.73.72 5.12 1.88L13 15h9V6l-3.6 3.6z"></path></svg>
+                        Refazer
+                    </button>
+                    <button class="action-button outline" id="clearBtn" disabled title="Limpar">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>
+                        Limpar
+                    </button>
+                    <button class="action-button outline full-width" id="exportBtn" disabled>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zm-5.5-2l-4-4h3V9h2v5h3l-4 4z"></path></svg>
+                        Exportar Relatório
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Canvas Area -->
+            <div class="canvas-area">
+                <div class="canvas-container">
+                    <div class="canvas-placeholder" id="canvasPlaceholder">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"></path>
+                        </svg>
+                        <h3>Carregue uma imagem para iniciar</h3>
+                        <p>Use a galeria ao lado</p>
+                    </div>
+                    <canvas id="canvas" class="hidden"></canvas>
+                </div>
+                
+                <div class="canvas-controls">
+                    <div class="controls-group">
+                        <button class="control-button" id="zoomOutBtn" disabled title="Diminuir">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5A6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z"></path></svg>
+                        </button>
+                        <span class="zoom-display" id="zoomDisplay">100%</span>
+                        <button class="control-button" id="zoomInBtn" disabled title="Aumentar">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5A6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-7H9v2H7v1h2v2h1v-2h2V9h-2z"></path></svg>
+                        </button>
+                        <button class="control-button" id="fitBtn" disabled title="Ajustar">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm0-8h3V4H5v5h2V6zm10 12h-3v2h5v-5h-2v3zm0-12V4h-5v2h3v3h2z"></path></svg>
+                        </button>
+                    </div>
+                    <div class="status-display" id="statusDisplay">Pronto</div>
+                    <button class="control-button" id="fullscreenBtn" title="Tela Cheia">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10H5V5h5v2H7v3zm0 9h3v-2H5v5h5v-3zm12-9v3h-2V5h5v5h-3zm0 7h-2v3h5v-5h-3v2z"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Documentation Panel -->
+            <aside class="documentation-panel">
+                <div class="section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path></svg>
+                        Detalhes da Imagem
+                    </h3>
+                    <div class="image-details" id="imageDetails">
+                        <p>Nenhuma imagem selecionada</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="form-group">
+                        <label class="form-label" for="imageTitle">🏷️ Título:</label>
+                        <input type="text" id="imageTitle" class="form-input" placeholder="Ex: Radiografia Panorâmica" disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="analysisType">📊 Tipo de Análise:</label>
+                        <select id="analysisType" class="form-select" disabled>
+                            <option value="">Selecione...</option>
+                            <option value="panoramic">Panorâmica</option>
+                            <option value="lateral">Lateral</option>
+                            <option value="intraoral">Intraoral</option>
+                            <option value="model">Modelo de Estudo</option>
+                            <option value="cbct">Tomografia (CBCT)</option>
+                            <option value="other">Outro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"></path></svg>
+                        Parecer Técnico
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="observations">Observações:</label>
+                        <textarea id="observations" class="form-textarea" placeholder="Achados relevantes..." rows="3" disabled></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="diagnosis">Diagnóstico:</label>
+                        <textarea id="diagnosis" class="form-textarea" placeholder="Diagnóstico presuntivo..." rows="2" disabled></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="treatment">Tratamento:</label>
+                        <textarea id="treatment" class="form-textarea" placeholder="Plano sugerido..." rows="3" disabled></textarea>
+                    </div>
+                </div>
+
+                <button class="action-button primary" id="saveAnalysisBtn" disabled>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"></path></svg>
+                    Salvar Análise
+                </button>
+
+                <div class="tips-box">
+                    <strong>💡 Dicas:</strong><br>
+                    • Ctrl+Z/Y: desfazer/refazer<br>
+                    • Scroll: zoom<br>
+                    • Botão do meio: mover<br>
+                    • Duplo clique: texto
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        // Application State
+        let appState = {
+            caseInfo: {
+                patientName: "",
+                dentistName: "",
+                entryDate: new Date().toISOString().split("T")[0],
+                caseStatus: "pending"
+            },
+            images: [],
+            currentImageIndex: -1,
+            selectedTool: "pen",
+            toolSettings: {
+                color: "oklch(0.80 0.10 85)",
+                strokeWidth: 2,
+                opacity: 1
+            },
+            canvasState: {
+                zoom: 1,
+                pan: { x: 0, y: 0 },
+                isPanning: false,
+                lastPanPosition: null,
+                imageFilters: {
+                    brightness: 100,
+                    contrast: 100
+                }
+            },
+            isDrawing: false,
+            startPoint: null,
+            currentPath: [],
+            history: {},
+            historyStep: {},
+            textInput: null
+        };
+
+        // DOM Elements
+        const elements = {
+            canvas: document.getElementById('canvas'),
+            canvasPlaceholder: document.getElementById('canvasPlaceholder'),
+            uploadArea: document.getElementById('uploadArea'),
+            fileInput: document.getElementById('fileInput'),
+            galleryGrid: document.getElementById('galleryGrid'),
+            imageCounter: document.getElementById('imageCounter'),
+            progressFill: document.getElementById('progressFill'),
+            progressText: document.getElementById('progressText'),
+            statusDisplay: document.getElementById('statusDisplay'),
+            zoomDisplay: document.getElementById('zoomDisplay'),
+            imageDetails: document.getElementById('imageDetails'),
+            strokeWidthValue: document.getElementById('strokeWidthValue'),
+            opacityValue: document.getElementById('opacityValue'),
+            brightnessValue: document.getElementById('brightnessValue'),
+            contrastValue: document.getElementById('contrastValue')
+        };
+
+        // Initialize Canvas
+        const ctx = elements.canvas.getContext('2d');
+
+        // Utility Functions
+        function updateStatus(message) {
+            elements.statusDisplay.textContent = message;
+        }
+
+        function getCanvasCoordinates(event) {
+            const rect = elements.canvas.getBoundingClientRect();
+            const screenX = event.clientX - rect.left;
+            const screenY = event.clientY - rect.top;
+            const worldX = (screenX - appState.canvasState.pan.x) / appState.canvasState.zoom;
+            const worldY = (screenY - appState.canvasState.pan.y) / appState.canvasState.zoom;
+            return { x: worldX, y: worldY };
+        }
+
+        function resizeCanvas() {
+            const container = elements.canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            elements.canvas.width = rect.width - 8;
+            elements.canvas.height = rect.height - 8;
+            drawCanvas();
+        }
+
+        function drawCanvas() {
+            if (!ctx || !elements.canvas.width || !elements.canvas.height) return;
+            
+            // Clear canvas
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--background');
+            ctx.fillRect(0, 0, elements.canvas.width, elements.canvas.height);
+            
+            const currentImage = appState.images[appState.currentImageIndex];
+            if (!currentImage) return;
+            
+            ctx.save();
+            ctx.translate(appState.canvasState.pan.x, appState.canvasState.pan.y);
+            ctx.scale(appState.canvasState.zoom, appState.canvasState.zoom);
+            
+            // Apply filters
+            const { brightness, contrast } = appState.canvasState.imageFilters;
+            ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+            
+            // Draw image
+            if (currentImage.htmlElement) {
+                ctx.drawImage(currentImage.htmlElement, 0, 0, currentImage.width, currentImage.height);
+            }
+            
+            ctx.filter = 'none';
+            
+            // Draw annotations
+            if (currentImage.annotations) {
+                currentImage.annotations.forEach(annotation => {
+                    drawAnnotation(ctx, annotation);
+                });
+            }
+            
+            // Draw current drawing
+            if (appState.isDrawing && appState.currentPath.length > 0) {
+                drawCurrentPath(ctx);
+            }
+            
+            ctx.restore();
+        }
+
+        function drawAnnotation(ctx, annotation) {
+            ctx.save();
+            ctx.strokeStyle = annotation.color;
+            ctx.lineWidth = annotation.strokeWidth;
+            ctx.globalAlpha = annotation.opacity;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.fillStyle = annotation.color;
+            
+            switch (annotation.tool) {
+                case 'pen':
+                    if (annotation.points.length > 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(annotation.points[0].x, annotation.points[0].y);
+                        for (let i = 1; i < annotation.points.length; i++) {
+                            ctx.lineTo(annotation.points[i].x, annotation.points[i].y);
+                        }
+                        ctx.stroke();
+                    }
+                    break;
+                    
+                case 'line':
+                case 'arrow':
+                    if (annotation.points.length >= 2) {
+                        ctx.beginPath();
+                        ctx.moveTo(annotation.points[0].x, annotation.points[0].y);
+                        ctx.lineTo(annotation.points[1].x, annotation.points[1].y);
+                        ctx.stroke();
+                        
+                        if (annotation.tool === 'arrow') {
+                            drawArrowhead(ctx, annotation.points[0], annotation.points[1], annotation.strokeWidth);
+                        }
+                    }
+                    break;
+                    
+                case 'rectangle':
+                    if (annotation.points.length >= 2) {
+                        const width = annotation.points[1].x - annotation.points[0].x;
+                        const height = annotation.points[1].y - annotation.points[0].y;
+                        ctx.strokeRect(annotation.points[0].x, annotation.points[0].y, width, height);
+                    }
+                    break;
+                    
+                case 'circle':
+                    if (annotation.points.length >= 2) {
+                        const radius = Math.sqrt(
+                            Math.pow(annotation.points[1].x - annotation.points[0].x, 2) + 
+                            Math.pow(annotation.points[1].y - annotation.points[0].y, 2)
+                        );
+                        ctx.beginPath();
+                        ctx.arc(annotation.points[0].x, annotation.points[0].y, radius, 0, 2 * Math.PI);
+                        ctx.stroke();
+                    }
+                    break;
+                    
+                case 'text':
+                    if (annotation.text) {
+                        ctx.font = `${annotation.fontSize || 16}px Arial`;
+                        ctx.fillText(annotation.text, annotation.points[0].x, annotation.points[0].y);
+                    }
+                    break;
+            }
+            
+            ctx.restore();
+        }
+
+        function drawCurrentPath(ctx) {
+            ctx.save();
+            ctx.strokeStyle = appState.toolSettings.color;
+            ctx.lineWidth = appState.toolSettings.strokeWidth;
+            ctx.globalAlpha = appState.toolSettings.opacity;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            switch (appState.selectedTool) {
+                case 'pen':
+                    if (appState.currentPath.length > 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(appState.currentPath[0].x, appState.currentPath[0].y);
+                        for (let i = 1; i < appState.currentPath.length; i++) {
+                            ctx.lineTo(appState.currentPath[i].x, appState.currentPath[i].y);
+                        }
+                        ctx.stroke();
+                    }
+                    break;
+                    
+                case 'line':
+                case 'arrow':
+                    if (appState.startPoint && appState.currentPath.length > 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(appState.startPoint.x, appState.startPoint.y);
+                        ctx.lineTo(appState.currentPath[appState.currentPath.length - 1].x, 
+                                 appState.currentPath[appState.currentPath.length - 1].y);
+                        ctx.stroke();
+                        
+                        if (appState.selectedTool === 'arrow') {
+                            drawArrowhead(ctx, appState.startPoint, 
+                                        appState.currentPath[appState.currentPath.length - 1], 
+                                        appState.toolSettings.strokeWidth);
+                        }
+                    }
+                    break;
+                    
+                case 'rectangle':
+                    if (appState.startPoint && appState.currentPath.length > 0) {
+                        const endPoint = appState.currentPath[appState.currentPath.length - 1];
+                        const width = endPoint.x - appState.startPoint.x;
+                        const height = endPoint.y - appState.startPoint.y;
+                        ctx.strokeRect(appState.startPoint.x, appState.startPoint.y, width, height);
+                    }
+                    break;
+                    
+                case 'circle':
+                    if (appState.startPoint && appState.currentPath.length > 0) {
+                        const endPoint = appState.currentPath[appState.currentPath.length - 1];
+                        const radius = Math.sqrt(
+                            Math.pow(endPoint.x - appState.startPoint.x, 2) + 
+                            Math.pow(endPoint.y - appState.startPoint.y, 2)
+                        );
+                        ctx.beginPath();
+                        ctx.arc(appState.startPoint.x, appState.startPoint.y, radius, 0, 2 * Math.PI);
+                        ctx.stroke();
+                    }
+                    break;
+            }
+            
+            ctx.restore();
+        }
+
+        function drawArrowhead(ctx, from, to, strokeWidth) {
+            const headLength = Math.max(10, strokeWidth * 3);
+            const angle = Math.atan2(to.y - from.y, to.x - from.x);
+            
+            ctx.beginPath();
+            ctx.moveTo(to.x, to.y);
+            ctx.lineTo(to.x - headLength * Math.cos(angle - Math.PI / 6), 
+                      to.y - headLength * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(to.x, to.y);
+            ctx.lineTo(to.x - headLength * Math.cos(angle + Math.PI / 6), 
+                      to.y - headLength * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+        }
+
+        function updateImageDetails(image) {
+            if (!image) {
+                elements.imageDetails.innerHTML = '<p>Nenhuma imagem selecionada</p>';
+                return;
+            }
+            
+            elements.imageDetails.innerHTML = `
+                <p><strong>Nome:</strong> ${image.file.name}</p>
+                <p><strong>Tipo:</strong> ${image.file.type || "N/A"}</p>
+                <p><strong>Tamanho:</strong> ${(image.file.size / 1024).toFixed(2)} KB</p>
+                <p><strong>Dimensões:</strong> ${image.width} x ${image.height} px</p>
+            `;
+        }
+
+        function updateGallery() {
+            if (appState.images.length === 0) {
+                elements.galleryGrid.innerHTML = '<p style="grid-column: span 3; text-align: center; color: var(--muted-foreground); padding: 12px; font-size: 0.75rem;">Nenhuma imagem carregada</p>';
+                return;
+            }
+            
+            elements.galleryGrid.innerHTML = appState.images.map((image, index) => `
+                <div class="gallery-item ${index === appState.currentImageIndex ? 'selected' : ''}" 
+                     onclick="selectImage(${index})" 
+                     title="${image.file.name}">
+                    <img src="${image.dataURL}" alt="${image.file.name}">
+                </div>
+            `).join('');
+        }
+
+        function updateProgress() {
+            const total = appState.images.length;
+            const analyzed = appState.images.filter(img => img.analysis && img.analysis.diagnosis).length;
+            const percentage = total > 0 ? (analyzed / total) * 100 : 0;
+            
+            elements.progressFill.style.width = `${percentage}%`;
+            elements.progressText.textContent = `${analyzed} de ${total} analisadas`;
+        }
+
+        function updateImageCounter() {
+            const count = appState.images.length;
+            elements.imageCounter.textContent = count > 0 ? `${count} imagem(s)` : 'Nenhuma imagem';
+        }
+
+        function selectImage(index) {
+            if (index >= 0 && index < appState.images.length) {
+                appState.currentImageIndex = index;
+                const image = appState.images[index];
+                
+                updateGallery();
+                updateImageDetails(image);
+                showCanvas();
+                fitImageToCanvas();
+                updateFormWithImageData(image);
+                updateStatus(`Imagem selecionada: ${image.file.name}`);
+                updateHistoryButtons();
+            }
+        }
+
+        function showCanvas() {
+            elements.canvasPlaceholder.classList.add('hidden');
+            elements.canvas.classList.remove('hidden');
+            
+            // Enable controls
+            document.getElementById('zoomInBtn').disabled = false;
+            document.getElementById('zoomOutBtn').disabled = false;
+            document.getElementById('fitBtn').disabled = false;
+            document.getElementById('clearBtn').disabled = false;
+            document.getElementById('exportBtn').disabled = false;
+            
+            // Enable documentation controls
+            const docControls = ['imageTitle', 'analysisType', 'observations', 'diagnosis', 'treatment', 'saveAnalysisBtn'];
+            docControls.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = false;
+            });
+        }
+
+        function fitImageToCanvas() {
+            const image = appState.images[appState.currentImageIndex];
+            if (!image || !elements.canvas.width || !elements.canvas.height) return;
+            
+            const padding = 20;
+            const availableWidth = elements.canvas.width - padding * 2;
+            const availableHeight = elements.canvas.height - padding * 2;
+            
+            const scaleX = availableWidth / image.width;
+            const scaleY = availableHeight / image.height;
+            const scale = Math.min(scaleX, scaleY, 1);
+            
+            appState.canvasState.zoom = scale;
+            appState.canvasState.pan = {
+                x: (elements.canvas.width - image.width * scale) / 2,
+                y: (elements.canvas.height - image.height * scale) / 2
+            };
+            
+            updateZoomDisplay();
+            drawCanvas();
+        }
+
+        function updateZoomDisplay() {
+            elements.zoomDisplay.textContent = `${Math.round(appState.canvasState.zoom * 100)}%`;
+        }
+
+        function updateFormWithImageData(image) {
+            if (!image.analysis) {
+                image.analysis = {
+                    title: "",
+                    analysisType: "",
+                    observations: "",
+                    diagnosis: "",
+                    treatment: ""
+                };
+            }
+            
+            document.getElementById('imageTitle').value = image.analysis.title || "";
+            document.getElementById('analysisType').value = image.analysis.analysisType || "";
+            document.getElementById('observations').value = image.analysis.observations || "";
+            document.getElementById('diagnosis').value = image.analysis.diagnosis || "";
+            document.getElementById('treatment').value = image.analysis.treatment || "";
+        }
+
+        function saveImageAnalysis() {
+            const image = appState.images[appState.currentImageIndex];
+            if (!image) return;
+            
+            if (!image.analysis) image.analysis = {};
+            
+            image.analysis.title = document.getElementById('imageTitle').value;
+            image.analysis.analysisType = document.getElementById('analysisType').value;
+            image.analysis.observations = document.getElementById('observations').value;
+            image.analysis.diagnosis = document.getElementById('diagnosis').value;
+            image.analysis.treatment = document.getElementById('treatment').value;
+            
+            updateProgress();
+            updateStatus("Análise salva");
+            saveToLocalStorage();
+        }
+
+        function handleImageUpload(files) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/tiff'];
+            
+            Array.from(files).forEach(file => {
+                if (validTypes.includes(file.type.toLowerCase()) || file.name.toLowerCase().match(/\.(tif|tiff|dcm)$/)) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const imageData = {
+                                id: `img-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                                file: file,
+                                dataURL: e.target.result,
+                                width: img.naturalWidth,
+                                height: img.naturalHeight,
+                                htmlElement: img,
+                                analysis: {
+                                    title: file.name.split('.')[0],
+                                    analysisType: "",
+                                    observations: "",
+                                    diagnosis: "",
+                                    treatment: ""
+                                },
+                                annotations: []
+                            };
+                            
+                            appState.images.push(imageData);
+                            appState.history[imageData.id] = [{ annotations: [] }];
+                            appState.historyStep[imageData.id] = 0;
+                            
+                            updateGallery();
+                            updateImageCounter();
+                            updateProgress();
+                            
+                            if (appState.currentImageIndex === -1) {
+                                selectImage(appState.images.length - 1);
+                            }
+                            
+                            saveToLocalStorage();
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            updateStatus("Carregando imagens...");
+        }
+
+        function updateHistoryButtons() {
+            const image = appState.images[appState.currentImageIndex];
+            if (!image) return;
+            
+            const history = appState.history[image.id] || [];
+            const step = appState.historyStep[image.id] || 0;
+            
+            document.getElementById('undoBtn').disabled = step <= 0;
+            document.getElementById('redoBtn').disabled = step >= history.length - 1;
+        }
+
+        function undo() {
+            const image = appState.images[appState.currentImageIndex];
+            if (!image) return;
+            
+            const step = appState.historyStep[image.id];
+            if (step > 0) {
+                appState.historyStep[image.id]--;
+                const previousState = appState.history[image.id][appState.historyStep[image.id]];
+                image.annotations = [...previousState.annotations];
+                drawCanvas();
+                updateHistoryButtons();
+                updateStatus("Desfeito");
+            }
+        }
+
+        function redo() {
+            const image = appState.images[appState.currentImageIndex];
+            if (!image) return;
+            
+            const history = appState.history[image.id];
+            const step = appState.historyStep[image.id];
+            
+            if (step < history.length - 1) {
+                appState.historyStep[image.id]++;
+                const nextState = history[appState.historyStep[image.id]];
+                image.annotations = [...nextState.annotations];
+                drawCanvas();
+                updateHistoryButtons();
+                updateStatus("Refeito");
+            }
+        }
+
+        function addToHistory() {
+            const image = appState.images[appState.currentImageIndex];
+            if (!image) return;
+            
+            if (!appState.history[image.id]) {
+                appState.history[image.id] = [];
+                appState.historyStep[image.id] = 0;
+            }
+            
+            const currentStep = appState.historyStep[image.id];
+            appState.history[image.id] = appState.history[image.id].slice(0, currentStep + 1);
+            appState.history[image.id].push({ annotations: [...image.annotations] });
+            appState.historyStep[image.id] = appState.history[image.id].length - 1;
+            
+            updateHistoryButtons();
+        }
+
+        function clearAnnotations() {
+            const image = appState.images[appState.currentImageIndex];
+            if (!image) return;
+            
+            if (confirm("Limpar todas as anotações?")) {
+                image.annotations = [];
+                addToHistory();
+                drawCanvas();
+                updateStatus("Anotações limpas");
+                saveToLocalStorage();
+            }
+        }
+
+        function exportMarkdown() {
+            if (!appState.caseInfo.patientName || appState.images.length === 0) {
+                alert("Preencha o nome do paciente e carregue imagens para exportar");
+                return;
+            }
+            
+            let markdown = `# Relatório Ortodôntico\n\n`;
+            markdown += `## Informações do Caso\n\n`;
+            markdown += `- **Paciente:** ${appState.caseInfo.patientName}\n`;
+            markdown += `- **Dentista:** ${appState.caseInfo.dentistName}\n`;
+            markdown += `- **Data de Entrada:** ${appState.caseInfo.entryDate}\n`;
+            markdown += `- **Status:** ${appState.caseInfo.caseStatus}\n\n`;
+            
+            markdown += `## Análises das Imagens\n\n`;
+            
+            appState.images.forEach((img, index) => {
+                markdown += `### ${index + 1}. ${img.analysis.title || img.file.name}\n\n`;
+                
+                if (img.analysis.analysisType) {
+                    markdown += `**Tipo de Análise:** ${img.analysis.analysisType}\n\n`;
+                }
+                
+                if (img.analysis.observations) {
+                    markdown += `**Observações Clínicas:**\n${img.analysis.observations}\n\n`;
+                }
+                
+                if (img.analysis.diagnosis) {
+                    markdown += `**Diagnóstico:**\n${img.analysis.diagnosis}\n\n`;
+                }
+                
+                if (img.analysis.treatment) {
+                    markdown += `**Plano de Tratamento:**\n${img.analysis.treatment}\n\n`;
+                }
+                
+                markdown += `---\n\n`;
+            });
+            
+            markdown += `*Relatório gerado em ${new Date().toLocaleString('pt-BR')}*`;
+            
+            // Download markdown file
+            const blob = new Blob([markdown], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `relatorio_${appState.caseInfo.patientName.replace(/\s+/g, '_').toLowerCase()}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            updateStatus("Relatório exportado");
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('orthoConsultCaseData', JSON.stringify(appState.caseInfo));
+                
+                const imagesToSave = appState.images.map(img => ({
+                    id: img.id,
+                    dataURL: img.dataURL,
+                    width: img.width,
+                    height: img.height,
+                    analysis: img.analysis,
+                    annotations: img.annotations || [],
+                    fileInfo: { name: img.file.name, type: img.file.type, size: img.file.size }
+                }));
+                
+                localStorage.setItem('orthoConsultImages', JSON.stringify(imagesToSave));
+            } catch (e) {
+                console.error("Erro ao salvar:", e);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const savedCaseInfo = localStorage.getItem('orthoConsultCaseData');
+                if (savedCaseInfo) {
+                    appState.caseInfo = JSON.parse(savedCaseInfo);
+                    document.getElementById('patientName').value = appState.caseInfo.patientName || "";
+                    document.getElementById('dentistName').value = appState.caseInfo.dentistName || "";
+                    document.getElementById('entryDate').value = appState.caseInfo.entryDate || "";
+                    document.getElementById('caseStatus').value = appState.caseInfo.caseStatus || "pending";
+                }
+                
+                const savedImages = localStorage.getItem('orthoConsultImages');
+                if (savedImages) {
+                    const imagesData = JSON.parse(savedImages);
+                    
+                    imagesData.forEach(imgData => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const imageFile = {
+                                id: imgData.id,
+                                file: new File([], imgData.fileInfo.name, { type: imgData.fileInfo.type }),
+                                dataURL: imgData.dataURL,
+                                width: imgData.width,
+                                height: imgData.height,
+                                htmlElement: img,
+                                analysis: imgData.analysis || {},
+                                annotations: imgData.annotations || []
+                            };
+                            
+                            appState.images.push(imageFile);
+                            appState.history[imageFile.id] = [{ annotations: [...imageFile.annotations] }];
+                            appState.historyStep[imageFile.id] = 0;
+                            
+                            updateGallery();
+                            updateImageCounter();
+                            updateProgress();
+                            
+                            if (appState.currentImageIndex === -1 && appState.images.length > 0) {
+                                selectImage(0);
+                            }
+                        };
+                        img.src = imgData.dataURL;
+                    });
+                }
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
+            }
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // File Upload
+            elements.uploadArea.addEventListener('click', () => {
+                elements.fileInput.click();
+            });
+            
+            elements.fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleImageUpload(e.target.files);
+                }
+            });
+            
+            // Drag and Drop
+            elements.uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                elements.uploadArea.classList.add('dragging');
+            });
+            
+            elements.uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                elements.uploadArea.classList.remove('dragging');
+            });
+            
+            elements.uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                elements.uploadArea.classList.remove('dragging');
+                if (e.dataTransfer.files.length > 0) {
+                    handleImageUpload(e.dataTransfer.files);
+                }
+            });
+            
+            // Tool Selection
+            document.querySelectorAll('.tool-button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tool-button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    appState.selectedTool = btn.dataset.tool;
+                    elements.canvas.style.cursor = appState.selectedTool === 'pan' ? 'grab' : 'crosshair';
+                    updateStatus(`Ferramenta: ${btn.title}`);
+                });
+            });
+            
+            // Color Selection
+            document.querySelectorAll('.color-button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.color-button').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    appState.toolSettings.color = btn.dataset.color;
+                });
+            });
+            
+            // Sliders
+            document.getElementById('strokeWidth').addEventListener('input', (e) => {
+                appState.toolSettings.strokeWidth = parseInt(e.target.value);
+                elements.strokeWidthValue.textContent = e.target.value;
+            });
+            
+            document.getElementById('opacity').addEventListener('input', (e) => {
+                appState.toolSettings.opacity = parseInt(e.target.value) / 100;
+                elements.opacityValue.textContent = e.target.value;
+            });
+            
+            document.getElementById('brightness').addEventListener('input', (e) => {
+                appState.canvasState.imageFilters.brightness = parseInt(e.target.value);
+                elements.brightnessValue.textContent = (e.target.value - 100);
+                drawCanvas();
+            });
+            
+            document.getElementById('contrast').addEventListener('input', (e) => {
+                appState.canvasState.imageFilters.contrast = parseInt(e.target.value);
+                elements.contrastValue.textContent = (e.target.value - 100);
+                drawCanvas();
+            });
+            
+            // Canvas Events
+            elements.canvas.addEventListener('mousedown', handleMouseDown);
+            elements.canvas.addEventListener('mousemove', handleMouseMove);
+            elements.canvas.addEventListener('mouseup', handleMouseUp);
+            elements.canvas.addEventListener('wheel', handleWheel);
+            elements.canvas.addEventListener('dblclick', handleDoubleClick);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    if (e.key === 'z') {
+                        e.preventDefault();
+                        undo();
+                    } else if (e.key === 'y' || (e.shiftKey && e.key === 'z')) {
+                        e.preventDefault();
+                        redo();
+                    }
+                }
+            });
+            
+            // Canvas Controls
+            document.getElementById('zoomInBtn').addEventListener('click', () => zoomCanvas(1.2));
+            document.getElementById('zoomOutBtn').addEventListener('click', () => zoomCanvas(0.8));
+            document.getElementById('fitBtn').addEventListener('click', fitImageToCanvas);
+            
+            // Action Buttons
+            document.getElementById('undoBtn').addEventListener('click', undo);
+            document.getElementById('redoBtn').addEventListener('click', redo);
+            document.getElementById('clearBtn').addEventListener('click', clearAnnotations);
+            document.getElementById('exportBtn').addEventListener('click', exportMarkdown);
+            document.getElementById('saveAnalysisBtn').addEventListener('click', saveImageAnalysis);
+            
+            // Form Changes
+            ['imageTitle', 'analysisType', 'observations', 'diagnosis', 'treatment'].forEach(id => {
+                document.getElementById(id).addEventListener('change', saveImageAnalysis);
+            });
+            
+            // Case Info Changes
+            ['patientName', 'dentistName', 'entryDate', 'caseStatus'].forEach(id => {
+                document.getElementById(id).addEventListener('change', () => {
+                    appState.caseInfo[id] = document.getElementById(id).value;
+                    saveToLocalStorage();
+                });
+            });
+            
+            // Window Resize
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        // Canvas Interaction Functions
+        function handleMouseDown(e) {
+            if (e.button === 1 || appState.selectedTool === 'pan') {
+                appState.canvasState.isPanning = true;
+                appState.canvasState.lastPanPosition = { x: e.clientX, y: e.clientY };
+                elements.canvas.style.cursor = 'grabbing';
+                return;
+            }
+            
+            if (e.button !== 0) return;
+            
+            const pos = getCanvasCoordinates(e);
+            appState.isDrawing = true;
+            appState.startPoint = pos;
+            appState.currentPath = [pos];
+            
+            updateStatus("Desenhando...");
+        }
+
+        function handleMouseMove(e) {
+            if (appState.canvasState.isPanning && appState.canvasState.lastPanPosition) {
+                const dx = e.clientX - appState.canvasState.lastPanPosition.x;
+                const dy = e.clientY - appState.canvasState.lastPanPosition.y;
+                appState.canvasState.pan.x += dx;
+                appState.canvasState.pan.y += dy;
+                appState.canvasState.lastPanPosition = { x: e.clientX, y: e.clientY };
+                drawCanvas();
+                return;
+            }
+            
+            if (!appState.isDrawing) return;
+            
+            const pos = getCanvasCoordinates(e);
+            
+            if (appState.selectedTool === 'pen') {
+                appState.currentPath.push(pos);
+            } else {
+                appState.currentPath = [appState.startPoint, pos];
+            }
+            
+            drawCanvas();
+        }
+
+        function handleMouseUp(e) {
+            if (appState.canvasState.isPanning) {
+                appState.canvasState.isPanning = false;
+                appState.canvasState.lastPanPosition = null;
+                elements.canvas.style.cursor = appState.selectedTool === 'pan' ? 'grab' : 'crosshair';
+                updateStatus("Pronto");
+                return;
+            }
+            
+            if (!appState.isDrawing || !appState.startPoint) {
+                appState.isDrawing = false;
+                return;
+            }
+            
+            const image = appState.images[appState.currentImageIndex];
+            if (!image) return;
+            
+            // Create annotation
+            const annotation = {
+                id: `ann-${Date.now()}`,
+                tool: appState.selectedTool,
+                color: appState.toolSettings.color,
+                strokeWidth: appState.toolSettings.strokeWidth,
+                opacity: appState.toolSettings.opacity,
+                points: [...appState.currentPath]
+            };
+            
+            // Check if drawing is meaningful
+            const isValid = appState.selectedTool === 'pen' ? 
+                appState.currentPath.length > 2 :
+                (Math.abs(appState.currentPath[0].x - appState.currentPath[appState.currentPath.length - 1].x) > 2 ||
+                 Math.abs(appState.currentPath[0].y - appState.currentPath[appState.currentPath.length - 1].y) > 2);
+            
+            if (isValid) {
+                image.annotations.push(annotation);
+                addToHistory();
+                saveToLocalStorage();
+                updateStatus("Anotação adicionada");
+            }
+            
+            appState.isDrawing = false;
+            appState.startPoint = null;
+            appState.currentPath = [];
+            drawCanvas();
+        }
+
+        function handleWheel(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            const mousePos = { x: e.offsetX, y: e.offsetY };
+            zoomCanvas(delta, mousePos);
+        }
+
+        function handleDoubleClick(e) {
+            if (appState.selectedTool === 'text') {
+                const pos = getCanvasCoordinates(e);
+                const text = prompt("Digite o texto:");
+                
+                if (text) {
+                    const image = appState.images[appState.currentImageIndex];
+                    if (!image) return;
+                    
+                    const annotation = {
+                        id: `text-${Date.now()}`,
+                        tool: 'text',
+                        color: appState.toolSettings.color,
+                        strokeWidth: appState.toolSettings.strokeWidth,
+                        opacity: appState.toolSettings.opacity,
+                        points: [pos],
+                        text: text,
+                        fontSize: 16
+                    };
+                    
+                    image.annotations.push(annotation);
+                    addToHistory();
+                    drawCanvas();
+                    saveToLocalStorage();
+                    updateStatus("Texto adicionado");
+                }
+            }
+        }
+
+        function zoomCanvas(factor, mousePos) {
+            const newZoom = Math.max(0.1, Math.min(5, appState.canvasState.zoom * factor));
+            
+            if (mousePos) {
+                const worldX = (mousePos.x - appState.canvasState.pan.x) / appState.canvasState.zoom;
+                const worldY = (mousePos.y - appState.canvasState.pan.y) / appState.canvasState.zoom;
+                
+                appState.canvasState.pan.x = mousePos.x - worldX * newZoom;
+                appState.canvasState.pan.y = mousePos.y - worldY * newZoom;
+            }
+            
+            appState.canvasState.zoom = newZoom;
+            updateZoomDisplay();
+            drawCanvas();
+        }
+
+        // Initialize Application
+        function init() {
+            document.getElementById('entryDate').value = appState.caseInfo.entryDate;
+            setupEventListeners();
+            resizeCanvas();
+            loadFromLocalStorage();
+            updateStatus("Pronto");
+        }
+
+        // Start when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        // Make selectImage global for gallery onclick
+        window.selectImage = selectImage;
+    </script>
+</body>
+</html>
+                
