@@ -1,0 +1,41 @@
+{
+  "name": "orthodontic-consultancy-system",
+  "version": "1.0.0",
+  "description": "Reda Consultoria App",
+  "author": "Reda Team",
+  "private": true,
+  "main": "main.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "electron": "^30.0.0",
+    "electron-builder": "^26.0.0",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
+  },
+  "build": {
+    "appId": "com.reda.consultoria",
+    "productName": "Reda Consultoria",
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
